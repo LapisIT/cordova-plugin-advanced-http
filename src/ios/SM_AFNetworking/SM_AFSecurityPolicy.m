@@ -91,12 +91,18 @@ _out:
 
 static BOOL AFServerTrustIsValid(SecTrustRef serverTrust) {
     BOOL isValid = NO;
-    SecTrustResultType result;
-    __Require_noErr_Quiet(SecTrustEvaluate(serverTrust, &result), _out);
+    
+    if (serverTrust == NULL) {
+        return NO;
+    }
 
-    isValid = (result == kSecTrustResultUnspecified || result == kSecTrustResultProceed);
+    CFErrorRef error = NULL;
+    if (SecTrustEvaluateWithError(serverTrust, &error)) {
+        isValid = YES;
+    } else {
+        CFRelease(error);
+    }
 
-_out:
     return isValid;
 }
 
